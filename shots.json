@@ -1,0 +1,42 @@
+[
+ {
+  "h": 1080,
+  "name": "1-cover-wide.jpg",
+  "out": [
+   1280,
+   720
+  ],
+  "query": "?shot=cover&aspect=wide&template=vice-grid&photos=beach,skyline,beach&caption=MIDNIGHT%20HEAT&kicker=VICE%20SHORES%20%E2%80%A2%20EST.%202026",
+  "w": 1920
+ },
+ {
+  "h": 1000,
+  "name": "2-editor.jpg",
+  "out": [
+   1280,
+   800
+  ],
+  "query": "?shot=editor&aspect=portrait&template=vice-grid&photos=skyline,beach,pier,skyline&caption=NEON%20HARBOR&kicker=VICE%20SHORES%20%E2%80%A2%20EST.%202026&letter=sunset",
+  "w": 1600
+ },
+ {
+  "h": 1350,
+  "name": "3-cover-portrait.jpg",
+  "out": [
+   1024,
+   1280
+  ],
+  "query": "?shot=cover&aspect=portrait&template=strips&photos=pier,beach,skyline,pier&caption=NEON%20HARBOR&kicker=VICE%20SHORES%20%E2%80%A2%20EST.%202026&letter=sunset",
+  "w": 1080
+ },
+ {
+  "h": 1080,
+  "name": "4-cover-square.jpg",
+  "out": [
+   1080,
+   1080
+  ],
+  "query": "?shot=cover&aspect=square&template=star&photos=skyline,beach,pier,pier,skyline&caption=VICE%20ROYALE&kicker=VICE%20SHORES%20%E2%80%A2%20EST.%202026&grade=neon&letter=neon",
+  "w": 1080
+ }
+]

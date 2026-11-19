@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sample scene generator — Neon Vice</title>
+</head>
+<body>
+<canvas id="beach" width="1200" height="900"></canvas>
+<canvas id="skyline" width="1200" height="900"></canvas>
+<canvas id="pier" width="1200" height="900"></canvas>
+<script>
+'use strict';
+// Procedural sample "photos" for the cover studio: three Vice-style scenes
+// drawn with canvas paths — a sunset beach with palms, a neon skyline over
+// water, and a boardwalk pier with a lit wheel. No photographs, no artwork
+// but this code's own. Results land on window.__samples as JPEG data URLs.
+
+function sky(ctx, w, y0, y1, stops) {
+  const g = ctx.createLinearGradient(0, y0, 0, y1);
+  for (const [at, colour] of stops) g.addColorStop(at, colour);
+  ctx.fillStyle = g;
+  ctx.fillRect(0, y0, w, y1 - y0);
+}
+
+function glowDot(ctx, x, y, r, colour) {
+  ctx.save();
+  ctx.shadowColor = colour;
+  ctx.shadowBlur = r * 2.2;
+  ctx.fillStyle = colour;
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+function cloudBank(ctx, rng, y, colour, rim) {
+  for (let i = 0; i < 7; i++) {
+    const cx = rng() * 1200, cy = y + rng() * 46, rx = 90 + rng() * 190, ry = 13 + rng() * 15;
+    ctx.fillStyle = rim;
+    ctx.beginPath(); ctx.ellipse(cx, cy + 5, rx, ry, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = colour;
+    ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2); ctx.fill();
+  }
+}
+
+function palm(ctx, x, baseY, s, dir, colour) {
+  ctx.strokeStyle = colour;
+  ctx.fillStyle = colour;
+  ctx.lineCap = 'round';
+  const lean = dir * 46 * s;
+  const topX = x + lean, topY = baseY - 300 * s;
+  for (let i = 0; i <= 24; i++) {
+    const t = i / 24;
+    const px = x + lean * t * t, py = baseY - 300 * s * t;
+    ctx.beginPath(); ctx.arc(px, py, (13 - 8 * t) * s, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.lineWidth = 7 * s;
+  for (let i = 0; i < 7; i++) {
+    const a = Math.PI * (0.08 + i * 0.14) + (dir < 0 ? 0.5 : 0);
+    const len = (120 + (i % 3) * 34) * s;
+    const ex = topX + Math.cos(a) * len * dir, ey = topY - Math.sin(a) * len * 0.55 + len * 0.34;
+    ctx.beginPath();
+    ctx.moveTo(topX, topY);
+    ctx.quadraticCurveTo(topX + Math.cos(a) * len * 0.5 * dir, topY - Math.sin(a) * len * 0.62, ex, ey);
+    ctx.stroke();
+  }
+}
+
+function birds(ctx, rng, colour) {
+  ctx.strokeStyle = colour;
+  ctx.lineWidth = 3;
+  for (let i = 0; i < 6; i++) {
+    const x = 120 + rng() * 960, y = 60 + rng() * 150, s = 7 + rng() * 7;
+    ctx.beginPath();
+    ctx.moveTo(x - s, y);
+    ctx.quadraticCurveTo(x - s * 0.4, y - s * 0.7, x, y);
+    ctx.quadraticCurveTo(x + s * 0.4, y - s * 0.7, x + s, y);
+    ctx.stroke();
+  }
+}
+
+function shimmer(ctx, rng, cx, y0, y1, colours) {
+  for (let i = 0; i < 240; i++) {
+    const t = rng();
+    const y = y0 + t * (y1 - y0);
+    const spread = 26 + t * 150;
+    const x = cx + (rng() - 0.5) * 2 * spread;
+    ctx.fillStyle = colours[i % colours.length];
+    ctx.globalAlpha = 0.12 + rng() * 0.3;
+    ctx.fillRect(x, y, 12 + rng() * 46 * (0.4 + t), 2.4);
+  }
+  ctx.globalAlpha = 1;
+}
+
+function grain(ctx, rng, w, h, n, alpha) {
+  for (let i = 0; i < n; i++) {
+    ctx.fillStyle = rng() > 0.5 ? 'rgba(255,255,255,' + alpha + ')' : 'rgba(0,0,0,' + alpha + ')';
+    ctx.fillRect(rng() * w, rng() * h, 1.6, 1.6);
+  }
+}
+
+function seeded(seed) {
+  let s = seed;
+  return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
+}
+
+function drawBeach(ctx) {
+  const rng = seeded(41);
+  sky(ctx, 1200, 0, 560, [[0, '#2a0a4a'], [0.34, '#7b1e63'], [0.62, '#e8487a'], [0.85, '#ff8a3d'], [1, '#ffd23d']]);
+  cloudBank(ctx, rng, 90, 'rgba(46,10,66,0.55)', 'rgba(255,110,150,0.35)');
+  cloudBank(ctx, rng, 210, 'rgba(46,10,66,0.45)', 'rgba(255,140,120,0.3)');
+  const sun = ctx.createRadialGradient(620, 545, 8, 620, 545, 120);
+  sun.addColorStop(0, '#fff6c8'); sun.addColorStop(0.55, '#ffb03d'); sun.addColorStop(1, 'rgba(255,122,61,0)');
+  ctx.fillStyle = sun;
+  ctx.fillRect(440, 380, 360, 200);
+  ctx.fillStyle = '#ffdf8a';
+  ctx.beginPath(); ctx.arc(620, 545, 74, 0, Math.PI * 2); ctx.fill();
+  sky(ctx, 1200, 560, 762, [[0, '#ff8a3d'], [0.25, '#c73a6e'], [0.7, '#5e1a5e'], [1, '#2a0a4a']]);
+  shimmer(ctx, rng, 620, 566, 752, ['#ffd23d', '#ff8a3d', '#ff5e8a']);
+  ctx.fillStyle = '#33113d';
+  ctx.fillRect(0, 762, 1200, 138);
+  ctx.fillStyle = 'rgba(255,140,80,0.18)';
+  ctx.fillRect(0, 762, 1200, 10);
+  palm(ctx, 96, 792, 1.25, 1, '#150722');
+  palm(ctx, 218, 772, 0.82, 1, '#150722');
+  palm(ctx, 1108, 786, 1.05, -1, '#150722');
+  ctx.fillStyle = '#150722';
+  ctx.fillRect(352, 690, 10, 74); ctx.fillRect(416, 690, 10, 74);
+  ctx.fillRect(338, 682, 104, 12); ctx.fillRect(330, 668, 120, 10);
+  ctx.beginPath(); ctx.moveTo(330, 668); ctx.lineTo(450, 668); ctx.lineTo(424, 640); ctx.lineTo(356, 640); ctx.fill();
+  birds(ctx, rng, 'rgba(30,5,40,0.8)');
+  grain(ctx, rng, 1200, 900, 1500, 0.05);
+}
+
+function drawSkyline(ctx) {
+  const rng = seeded(97);
+  sky(ctx, 1200, 0, 640, [[0, '#0b1035'], [0.4, '#3a1160'], [0.72, '#b83a7a'], [1, '#ff7a3d']]);
+  glowDot(ctx, 180, 120, 26, 'rgba(255,240,200,0.9)');
+  function layer(base, colour, minH, maxH) {
+    let x = -10;
+    const tops = [];
+    while (x < 1210) {
+      const bw = 46 + rng() * 90, bh = minH + rng() * (maxH - minH);
+      ctx.fillStyle = colour;
+      ctx.fillRect(x, base - bh, bw, bh);
+      tops.push([x, base - bh, bw, bh]);
+      x += bw + 4 + rng() * 22;
+    }
+    return tops;
+  }
+  const far = layer(648, '#2a1445', 130, 300);
+  const near = layer(684, '#12071f', 190, 430);
+  function windows(buildings, density) {
+    for (const [x, y, bw, bh] of buildings) {
+      const cols = Math.floor(bw / 13), rows = Math.floor(bh / 17);
+      for (let c = 0; c < cols; c++) for (let r = 0; r < rows; r++) {
+        if (rng() > density) continue;
+        const palette = ['#ffd23d', '#7df9ff', '#ff3d8a', '#fff3b0'];
+        ctx.fillStyle = palette[Math.floor(rng() * palette.length)];
+        ctx.globalAlpha = 0.55 + rng() * 0.45;
+        ctx.fillRect(x + 5 + c * 13, y + 7 + r * 17, 5, 7);
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+  windows(far, 0.16);
+  windows(near, 0.3);
+  const signs = [[150, 330, '#ff3d8a'], [560, 260, '#2de2e6'], [905, 350, '#ffc93d']];
+  for (const [x, y, colour] of signs) {
+    ctx.save();
+    ctx.shadowColor = colour; ctx.shadowBlur = 26;
+    ctx.fillStyle = colour;
+    ctx.fillRect(x, y, 13, 74);
+    ctx.restore();
+  }
+  ctx.strokeStyle = '#0a0518';
+  ctx.lineWidth = 13;
+  ctx.beginPath(); ctx.moveTo(0, 692); ctx.lineTo(1200, 662); ctx.stroke();
+  ctx.lineWidth = 7;
+  for (const tx of [300, 880]) {
+    ctx.beginPath(); ctx.moveTo(tx, 560); ctx.lineTo(tx, 690); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(tx, 566); ctx.quadraticCurveTo(tx - 280, 640, 0, 688); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(tx, 566); ctx.quadraticCurveTo(tx + 300, 636, 1200, 664); ctx.stroke();
+  }
+  sky(ctx, 1200, 700, 900, [[0, '#1c0b38'], [1, '#070313']]);
+  shimmer(ctx, rng, 300, 706, 880, ['#ffd23d', '#ff3d8a', '#2de2e6']);
+  shimmer(ctx, rng, 880, 706, 880, ['#ffc93d', '#ff8a3d', '#7df9ff']);
+  palm(ctx, 1150, 900, 0.95, -1, '#0a0518');
+  grain(ctx, rng, 1200, 900, 1500, 0.05);
+}
+
+function drawPier(ctx) {
+  const rng = seeded(63);
+  sky(ctx, 1200, 0, 520, [[0, '#1c0b38'], [0.45, '#6d1a5e'], [0.78, '#e8487a'], [1, '#ffb03d']]);
+  cloudBank(ctx, rng, 120, 'rgba(40,10,60,0.5)', 'rgba(255,120,150,0.3)');
+  sky(ctx, 1200, 520, 900, [[0, '#ff8a3d'], [0.3, '#a02a63'], [1, '#1c0b38']]);
+  shimmer(ctx, rng, 240, 530, 860, ['#ffd23d', '#ff8a3d', '#ff5e8a']);
+  const cx = 905, cy = 322, r = 148;
+  ctx.strokeStyle = '#180826';
+  ctx.lineWidth = 16;
+  ctx.beginPath(); ctx.moveTo(cx - 96, 560); ctx.lineTo(cx, cy); ctx.lineTo(cx + 96, 560); ctx.stroke();
+  ctx.lineWidth = 11;
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+  ctx.lineWidth = 5;
+  for (let i = 0; i < 8; i++) {
+    const a = (i / 8) * Math.PI * 2;
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r); ctx.stroke();
+    ctx.fillStyle = '#180826';
+    ctx.fillRect(cx + Math.cos(a + 0.39) * r - 11, cy + Math.sin(a + 0.39) * r - 8, 22, 16);
+  }
+  const bulbColours = ['#ff3d8a', '#2de2e6', '#ffc93d', '#ff8a3d'];
+  for (let i = 0; i < 28; i++) {
+    const a = (i / 28) * Math.PI * 2;
+    glowDot(ctx, cx + Math.cos(a) * r, cy + Math.sin(a) * r, 4.6, bulbColours[i % 4]);
+  }
+  glowDot(ctx, cx, cy, 9, '#fff3b0');
+  ctx.fillStyle = '#200a33';
+  ctx.beginPath();
+  ctx.moveTo(368, 900); ctx.lineTo(832, 900); ctx.lineTo(684, 540); ctx.lineTo(516, 540); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,170,90,0.35)';
+  ctx.lineWidth = 3;
+  for (let i = 1; i < 7; i++) {
+    const t = i / 7, y = 900 - t * 360;
+    ctx.beginPath(); ctx.moveTo(368 + (516 - 368) * t, y); ctx.lineTo(832 - (832 - 684) * t, y); ctx.stroke();
+  }
+  ctx.strokeStyle = '#12041f';
+  ctx.lineWidth = 9;
+  ctx.beginPath(); ctx.moveTo(392, 900); ctx.lineTo(528, 540); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(808, 900); ctx.lineTo(672, 540); ctx.stroke();
+  for (const [lx, ly, s] of [[452, 700, 1], [540, 606, 0.8], [748, 700, 1], [660, 606, 0.8]]) {
+    ctx.strokeStyle = '#12041f';
+    ctx.lineWidth = 6 * s;
+    ctx.beginPath(); ctx.moveTo(lx, ly + 66 * s); ctx.lineTo(lx, ly); ctx.stroke();
+    glowDot(ctx, lx, ly - 6, 8 * s, '#ffc93d');
+  }
+  ctx.strokeStyle = 'rgba(20,4,30,0.85)';
+  ctx.lineWidth = 2.4;
+  ctx.beginPath(); ctx.moveTo(60, 150); ctx.quadraticCurveTo(420, 260, 770, 196); ctx.stroke();
+  for (let i = 0; i <= 12; i++) {
+    const t = i / 12;
+    const x = (1 - t) * (1 - t) * 60 + 2 * (1 - t) * t * 420 + t * t * 770;
+    const y = (1 - t) * (1 - t) * 150 + 2 * (1 - t) * t * 260 + t * t * 196;
+    glowDot(ctx, x, y + 7, 3.6, bulbColours[i % 4]);
+  }
+  palm(ctx, 52, 880, 1.1, 1, '#12041f');
+  grain(ctx, rng, 1200, 900, 1500, 0.05);
+}
+
+const painters = { beach: drawBeach, skyline: drawSkyline, pier: drawPier };
+window.__samples = {};
+for (const [name, paint] of Object.entries(painters)) {
+  const canvas = document.getElementById(name);
+  paint(canvas.getContext('2d'));
+  window.__samples[name] = canvas.toDataURL('image/jpeg', 0.88);
+}
+window.__samplesReady = true;
+</script>
+</body>
+</html>

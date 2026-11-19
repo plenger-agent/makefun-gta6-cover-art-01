@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neon Vice Cover Studio — poster cover art from your photos</title>
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true">NV</span>
+    <span class="brand-words">
+      <strong>Neon Vice Cover Studio</strong>
+      <small>Your photos, turned into multi-panel poster cover art.</small>
+    </span>
+  </div>
+  <p class="topbar-note">Photos are read on this machine and never uploaded.</p>
+</header>
+
+<main class="workspace">
+  <aside class="rail" aria-label="Cover controls">
+    <section class="control-group">
+      <h2>1 · Photos</h2>
+      <label class="drop">
+        <input id="photo-input" type="file" accept="image/*" multiple>
+        <span>Add your photos</span>
+        <small>or drop them on the cover</small>
+      </label>
+      <div class="sample-row">
+        <span>Try a sample:</span>
+        <button type="button" class="chip" data-sample="beach">Beach</button>
+        <button type="button" class="chip" data-sample="skyline">Skyline</button>
+        <button type="button" class="chip" data-sample="pier">Pier</button>
+      </div>
+      <div id="photo-strip" class="photo-strip" aria-label="Loaded photos"></div>
+      <p class="hint">Pick a photo, then click a panel to place it — or fill every panel with one photo.</p>
+      <button type="button" id="fill-all" class="wide-button">Fill every panel with the picked photo</button>
+    </section>
+
+    <section class="control-group">
+      <h2>2 · Layout &amp; size</h2>
+      <div class="button-grid" id="template-buttons" role="group" aria-label="Panel layout">
+        <button type="button" data-template="vice-grid">Vice Grid</button>
+        <button type="button" data-template="slash">Neon Slash</button>
+        <button type="button" data-template="star">Cover Star</button>
+        <button type="button" data-template="strips">Palm Strips</button>
+      </div>
+      <div class="button-grid" id="aspect-buttons" role="group" aria-label="Post size">
+        <button type="button" data-aspect="square">Square 1:1</button>
+        <button type="button" data-aspect="portrait">Portrait 4:5</button>
+        <button type="button" data-aspect="wide">Wide 16:9</button>
+      </div>
+    </section>
+
+    <section class="control-group">
+      <h2>3 · Panel</h2>
+      <p class="hint" id="panel-label">Panel 1 selected. Drag on the cover to reposition its photo.</p>
+      <label class="slider-row">Zoom
+        <input id="panel-zoom" type="range" min="1" max="3" step="0.01" value="1">
+      </label>
+      <div class="button-grid">
+        <button type="button" id="panel-centre">Centre photo</button>
+        <button type="button" id="panel-clear">Empty panel</button>
+      </div>
+    </section>
+
+    <section class="control-group">
+      <h2>4 · Words</h2>
+      <label class="field">Caption
+        <input id="caption-input" type="text" maxlength="42" value="MIDNIGHT HEAT">
+      </label>
+      <label class="field">Kicker line
+        <input id="kicker-input" type="text" maxlength="48" value="VICE SHORES • EST. 2026">
+      </label>
+      <div class="swatch-row" id="letter-buttons" role="group" aria-label="Lettering style">
+        <button type="button" data-letter="porcelain" class="swatch swatch-porcelain">Ag</button>
+        <button type="button" data-letter="sunset" class="swatch swatch-sunset">Ag</button>
+        <button type="button" data-letter="neon" class="swatch swatch-neon">Ag</button>
+        <button type="button" data-letter="gold" class="swatch swatch-gold">Ag</button>
+      </div>
+    </section>
+
+    <section class="control-group">
+      <h2>5 · Colour grade</h2>
+      <div class="button-grid" id="grade-buttons" role="group" aria-label="Colour grade">
+        <button type="button" data-grade="sunset">Vice Sunset</button>
+        <button type="button" data-grade="neon">Neon Night</button>
+        <button type="button" data-grade="golden">Golden Hour</button>
+        <button type="button" data-grade="clean">Clean Plate</button>
+      </div>
+      <label class="slider-row">Grade strength
+        <input id="grade-strength" type="range" min="0" max="100" step="1" value="80">
+      </label>
+    </section>
+
+    <section class="control-group">
+      <h2>6 · Export PNG</h2>
+      <div class="export-stack">
+        <button type="button" class="export-button" data-export="square">1080 × 1080 — square post</button>
+        <button type="button" class="export-button" data-export="portrait">1080 × 1350 — portrait post</button>
+        <button type="button" class="export-button" data-export="wide">1920 × 1080 — wide banner</button>
+      </div>
+      <p id="status" class="status" role="status"></p>
+    </section>
+  </aside>
+
+  <section class="stage-wrap">
+    <div class="stage" id="stage">
+      <canvas id="cover-canvas" width="1080" height="1080" aria-label="Live cover preview"></canvas>
+    </div>
+    <p class="stage-note">Live preview — click a panel to select it, drag to reposition its photo, scroll a slider to zoom.</p>
+  </section>
+</main>
+
+<footer class="foot">
+  <p>An original cover-art toy. Every picture and word on a cover is yours; nothing here is affiliated with any game publisher.</p>
+</footer>
+
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
